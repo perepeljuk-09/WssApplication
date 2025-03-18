@@ -1,0 +1,15 @@
+.vs
+
+**/obj
+**/bin
+**/Debug
+
+###################
+# compiled source #
+###################
+*.exe
+*.pdb
+*.dll.config
+*.cache
+*.suo
+.idea/
