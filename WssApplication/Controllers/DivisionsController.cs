@@ -1,4 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WssApplication.Infrastructure.ServiceInterfaces;
+using WssApplication.Infrastructure.Services;
+using WssApplication.Shared.Dtos.Department;
+using WssApplication.Shared.Dtos.Division;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,37 +16,86 @@ namespace WssApplication.Api.Controllers
     [ApiController]
     public class DivisionsController : ControllerBase
     {
-        // GET: api/<DivisionsController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+
+        private readonly ILogger<DivisionsController> _logger;
+        private readonly IDivisionService _divisionsService;
+
+        public DivisionsController(
+            ILogger<DivisionsController> logger,
+            IDivisionService divisionsService)
         {
-            return new string[] { "value1", "value2" };
+            _logger = logger;
+            _divisionsService = divisionsService;
         }
 
-        // GET api/<DivisionsController>/5
+        [HttpGet("{departmentId}")]
+        public async Task<IActionResult> GetByDepartmentId(int departmentId)
+        {
+            // Получаем все отделы департамента
+            var result = await _divisionsService.GetDivisionsByDepartmentId(departmentId);
+
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            return "value";
+            // Получаем отдел
+            var result = await _divisionsService.GetDivisionById(id);
+
+            return Ok(result);
         }
 
-        // POST api/<DivisionsController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> Create([FromBody] DivisionCreationDto departmentCreationDto)
         {
-            // Создание отдела
+            // Создаём отдел
+            var result = await _divisionsService.CreateDivision(departmentCreationDto);
+
+            return Ok(result);
+
+            // после получения браузером ответа
+            // с фронта отправляем запрос, что данные изменились, и надо запросить новую модель для всех
+            // CatalogHub => NotifyWasChanged
         }
 
-        // PUT api/<DivisionsController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> Update([FromBody] DivisionUpdateDto departmentUpdateDto, int id)
         {
+            // Обновляем данные отдела
+            var result = await _divisionsService.UpdateDivision(departmentUpdateDto, id);
+
+            return Ok(result);
+
+            // после получения браузером ответа
+            // с фронта отправляем запрос, что данные изменились, и надо запросить новую модель для всех
+            // CatalogHub => NotifyWasChanged
         }
 
-        // DELETE api/<DivisionsController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            // Удаляем отдел
+            await _divisionsService.DeleteDivision(id);
+
+            return Ok();
+
+            // после получения браузером ответа
+            // с фронта отправляем запрос, что данные изменились, и надо запросить новую модель для всех
+            // CatalogHub => NotifyWasChanged
+        }
+
+        [HttpPost("move")]
+        public async Task<IActionResult> Move([FromBody] DivisionMoveDto divisionMoveDto)
+        {
+            // Перемещаем отдел
+            await _divisionsService.Move(divisionMoveDto);
+
+            return Ok();
+
+            // после получения браузером ответа
+            // с фронта отправляем запрос, что данные изменились, и надо запросить новую модель для всех
+            // CatalogHub => NotifyWasChanged
         }
     }
 }

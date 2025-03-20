@@ -1,11 +1,25 @@
+using Microsoft.EntityFrameworkCore;
+using WssApplication.Api.Extensions;
+using WssApplication.Api.Hubs;
+using WssApplication.Infrastructure.Db;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+// регистрируем сигналР, чтоб взаимодействовать в реал-тайм
+builder.Services.AddSignalR();
+// регистрируем все наши сервисы
+builder.Services.AddServices();
+// регистрируем ДБ контекст
+builder.Services.AddDbContext<PgContext>((options) => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// регистрируем автомапер
+builder.Services
+    .AddAutoMapper(typeof(PgContext).Assembly);
 
 var app = builder.Build();
 
@@ -21,5 +35,11 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+// энд поинт для работы со справочником, к которому подключаются все пользователи
+app.MapHub<CatalogHub>("/catalog");
 
 app.Run();

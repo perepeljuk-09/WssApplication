@@ -5,8 +5,8 @@ namespace WssApplication.Domain.Entities
     /// <summary>
     /// Базовый класс для всех сущностей, с полями которые будут у всех
     /// </summary>
-    /// <typeparam name="T">Айди</typeparam>
-    public class BaseEntity<T> : ISoftDeletable
+    /// <typeparam name="T">Тип айди сущности</typeparam>
+    public abstract class BaseEntity<T> : ISoftDeletable
     {
         public T Id { get; set; }
 
